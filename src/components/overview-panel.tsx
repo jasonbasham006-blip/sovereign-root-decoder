@@ -114,6 +114,13 @@ const VECTORS: {
     },
   },
   {
+    id: "survey",
+    code: "GS",
+    title: "Estate survey",
+    body: "WGS84 plot from the Kurtz Avenue octagon. Line 7, true south, 79 / 118 km scalers.",
+    badge: { label: "Line 7", variant: "pass" },
+  },
+  {
     id: "gematria",
     code: "L2",
     title: "Gematria engine",

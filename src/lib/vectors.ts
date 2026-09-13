@@ -6,4 +6,5 @@ export type VectorId =
   | "proofs"
   | "harness"
   | "evidence"
-  | "artifacts";
+  | "artifacts"
+  | "survey";

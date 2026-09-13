@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   Binary,
   CircleDot,
+  Compass,
   FileSearch,
   FlaskConical,
   Hash,
@@ -23,10 +24,12 @@ import { ProofsPanel } from "@/components/proofs-panel";
 import { HarnessPanel } from "@/components/harness-panel";
 import { EvidencePanel } from "@/components/evidence-panel";
 import { ArtifactsPanel } from "@/components/artifacts-panel";
+import { SurveyPanel } from "@/components/survey-panel";
 
 const NAV: { id: VectorId; label: string; icon: typeof Hash }[] = [
   { id: "overview", label: "Overview", icon: ScanLine },
   { id: "artifacts", label: "Field", icon: MapPinned },
+  { id: "survey", label: "Survey", icon: Compass },
   { id: "gematria", label: "Gematria", icon: Hash },
   { id: "corpus", label: "Corpus", icon: Library },
   { id: "lattice", label: "Lattice", icon: CircleDot },
@@ -36,7 +39,7 @@ const NAV: { id: VectorId; label: string; icon: typeof Hash }[] = [
 ];
 
 export function DecoderApp() {
-  const [vector, setVector] = useState<VectorId>("artifacts");
+  const [vector, setVector] = useState<VectorId>("survey");
 
   return (
     <div className="min-h-dvh bg-bg text-fg">
@@ -85,6 +88,7 @@ export function DecoderApp() {
         <div key={vector} className="stagger-in">
           {vector === "overview" && <OverviewPanel onOpen={setVector} />}
           {vector === "artifacts" && <ArtifactsPanel />}
+          {vector === "survey" && <SurveyPanel />}
           {vector === "gematria" && <GematriaPanel />}
           {vector === "corpus" && <CorpusPanel />}
           {vector === "lattice" && <LatticePanel />}
