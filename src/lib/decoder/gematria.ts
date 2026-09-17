@@ -94,13 +94,24 @@ export function decodePhrase(phrase: string): {
   cleaned: string;
   fw: number[];
   rv: number[];
+  ordinal: number;
+  sixScale: number;
+  filters: { katan: number; mod49: number; mod13: number };
   tongues: { name: TongueName; base: number; sum: number }[];
 } {
   const { fw, rv } = fourteenTracks(phrase);
+  const ordinal = forwardGematria(cleanText(phrase), 1);
   return {
     cleaned: cleanText(phrase),
     fw,
     rv,
+    ordinal,
+    sixScale: ordinal * 6,
+    filters: {
+      katan: ordinal % 9,
+      mod49: ordinal % 49,
+      mod13: ordinal % 13,
+    },
     tongues: TONGUES.map(([name, base]) => ({
       name,
       base,
@@ -108,3 +119,36 @@ export function decodePhrase(phrase: string): {
     })),
   };
 }
+
+export type TongueResidue = {
+  name: TongueName;
+  base: number;
+  residue: number;
+  letter: string;
+};
+
+export function tongueResidues(n: number): TongueResidue[] {
+  return TONGUES.map(([name, base]) => {
+    const residue = n % base;
+    return { name, base, residue, letter: String.fromCharCode(65 + residue) };
+  });
+}
+
+export const ESAEESA = tongueResidues(1170);
+
+export const KY_TOWNS = [
+  {
+    name: "PAINTSVILLE",
+    ordinalExpect: 139,
+    sixExpect: 834,
+    jewishOperator: 1054,
+    hebrewOperator: 271,
+  },
+  {
+    name: "STAFFORDSVILLE",
+    ordinalExpect: 168,
+    sixExpect: 1008,
+    jewishOperator: 1181,
+    hebrewOperator: 471,
+  },
+] as const;

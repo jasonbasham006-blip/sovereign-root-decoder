@@ -1,8 +1,18 @@
-import { useState } from "react";
-import { ingestGoldenCorpus, type PropositionReceipt } from "@/lib/decoder";
+"use client";
+
+import { useMemo, useState } from "react";
+import {
+  FAIC_COLLECTION,
+  FAIC_HITS,
+  FAIC_INTERVIEWEES,
+  faicSearch,
+  ingestGoldenCorpus,
+  type PropositionReceipt,
+} from "@/lib/decoder";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 
 const FACTORS = [
@@ -24,6 +34,9 @@ export function EvidencePanel() {
   const [receipt, setReceipt] = useState<PropositionReceipt | null>(null);
   const [audit, setAudit] = useState<string | null>(null);
   const [events, setEvents] = useState<number>(0);
+  const [query, setQuery] = useState("Packard");
+
+  const names = useMemo(() => faicSearch(query), [query]);
 
   async function ingest() {
     setRunning(true);
@@ -42,6 +55,90 @@ export function EvidencePanel() {
 
   return (
     <div className="flex flex-col gap-4">
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <CardTitle>FAIC / Winterthur oral history</CardTitle>
+              <CardDescription>
+                Field-wide conservation archive. Not a Packard-only box. Transcript bodies stay
+                fail-closed until the Winterthur PDF is pasted.
+              </CardDescription>
+            </div>
+            <Badge variant="accent">{FAIC_INTERVIEWEES.length} names</Badge>
+          </div>
+        </CardHeader>
+        <p className="text-sm leading-normal text-muted">
+          {FAIC_COLLECTION.name}, launched {FAIC_COLLECTION.launched} under {FAIC_COLLECTION.director}.{" "}
+          {FAIC_COLLECTION.aicNote} Finding aid {FAIC_COLLECTION.findingAid}.
+        </p>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[36rem] text-left text-sm">
+            <thead className="font-mono text-xs text-subtle">
+              <tr className="border-b border-border">
+                <th className="py-2 pr-3 font-medium">Record</th>
+                <th className="py-2 pr-3 font-medium">Kind</th>
+                <th className="py-2 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {FAIC_HITS.map((h) => (
+                <tr key={h.id} className="border-b border-border/60 align-top">
+                  <td className="py-2 pr-3">
+                    <p className="text-fg">{h.name}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-muted">{h.note}</p>
+                  </td>
+                  <td className="py-2 pr-3 font-mono text-xs text-muted">
+                    {h.kind}
+                    {h.year ? ` · ${h.year}` : ""}
+                  </td>
+                  <td className="py-2">
+                    <Badge
+                      variant={
+                        h.status === "CATALOGED"
+                          ? "pass"
+                          : h.status === "NOT_IN_INDEX" || h.status === "FAIL_CLOSED"
+                            ? "warn"
+                            : "default"
+                      }
+                    >
+                      {h.status.replaceAll("_", " ")}
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <Separator className="my-4" />
+        <label className="flex flex-col gap-1.5">
+          <span className="font-mono text-xs uppercase tracking-wider text-muted">
+            Filter {FAIC_INTERVIEWEES.length} indexed interviewees
+          </span>
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Packard, Werner, Stout…"
+            className="font-mono"
+          />
+        </label>
+        <p className="mt-2 font-mono text-xs text-subtle">{names.length} match</p>
+        <ul className="mt-2 columns-1 gap-x-6 text-sm sm:columns-2 lg:columns-3">
+          {names.map((n) => (
+            <li
+              key={n}
+              className={
+                n.includes("Packard") || n.includes("Werner")
+                  ? "font-medium text-fg"
+                  : "text-muted"
+              }
+            >
+              {n}
+            </li>
+          ))}
+        </ul>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Golden corpus</CardTitle>

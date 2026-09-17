@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { CALLING_CARD, circularLatticeExtract } from "@/lib/decoder";
+import { CALLING_CARD, callingCardPhase, circularLatticeExtract } from "@/lib/decoder";
 import { LatticeRing } from "@/components/lattice-ring";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,10 +17,8 @@ export function LatticePanel() {
     [ringText, startChar, stepSize, dynamic],
   );
 
-  const standard = useMemo(
-    () => circularLatticeExtract(CALLING_CARD, "O", 3, false),
-    [],
-  );
+  const standard = useMemo(() => circularLatticeExtract(CALLING_CARD, "O", 3, false), []);
+  const phase = useMemo(() => callingCardPhase(CALLING_CARD), []);
 
   return (
     <div className="flex flex-col gap-4">
@@ -128,6 +126,44 @@ export function LatticePanel() {
           </Card>
         </div>
       </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <CardTitle>Phase lock — TAN / CRIES / SEC</CardTitle>
+              <CardDescription>
+                Same +3 stride after the seven-letter token. Historical S at index 7 is required.
+              </CardDescription>
+            </div>
+            <Badge variant={phase.sPhase ? "pass" : "fail"}>
+              {phase.sPhase ? "S-phase lock" : "phase fail"}
+            </Badge>
+          </div>
+        </CardHeader>
+        <dl className="grid grid-cols-2 gap-3 font-mono text-sm sm:grid-cols-4">
+          <div>
+            <dt className="text-xs text-subtle">Token</dt>
+            <dd className="mt-0.5 text-fg">{phase.tokenDotted}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-subtle">TAN</dt>
+            <dd className="mt-0.5 text-fg">{phase.tan.word}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-subtle">CRIES</dt>
+            <dd className="mt-0.5 text-fg">{phase.cries.word}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-subtle">SEC</dt>
+            <dd className="mt-0.5 text-fg">{phase.sec.word}</dd>
+          </div>
+        </dl>
+        <p className="mt-3 text-sm leading-normal text-muted">
+          Z at index 7 yields {phase.zFail.cries} / {phase.zFail.sec} — semantic failure. Δ(Z, S) ={" "}
+          {phase.deltaZS}, the Gate 7 shift. Operator total-parity 6076 is recorded, not recomputed here.
+        </p>
+      </Card>
     </div>
   );
 }

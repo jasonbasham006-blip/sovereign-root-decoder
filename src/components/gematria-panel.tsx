@@ -1,11 +1,20 @@
 import { useMemo, useState } from "react";
-import { decodePhrase, TONGUES } from "@/lib/decoder";
+import { decodePhrase, ESAEESA, KY_TOWNS, TONGUES } from "@/lib/decoder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-const PRESETS = ["BASHAM", "JASON DEWAYNE", "LIBERTY LANTERN", "SOVEREIGN", "AUTHORITY", "PACKARD"];
+const PRESETS = [
+  "BASHAM",
+  "JASON DEWAYNE",
+  "LIBERTY LANTERN",
+  "SOVEREIGN",
+  "AUTHORITY",
+  "PACKARD",
+  "PAINTSVILLE",
+  "STAFFORDSVILLE",
+];
 
 export function GematriaPanel() {
   const [phrase, setPhrase] = useState("LIBERTY LANTERN");
@@ -13,6 +22,7 @@ export function GematriaPanel() {
 
   const result = useMemo(() => decodePhrase(submitted), [submitted]);
   const maxTrack = Math.max(...result.fw, ...result.rv, 1);
+  const ky = KY_TOWNS.find((t) => t.name === result.cleaned);
 
   function run(next?: string) {
     const value = (next ?? phrase).trim();
@@ -57,6 +67,73 @@ export function GematriaPanel() {
         </div>
       </Card>
 
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Ordinal</CardTitle>
+            <CardDescription>A=1 … Z=26</CardDescription>
+          </CardHeader>
+          <p className="font-mono text-3xl tabular-nums">{result.ordinal}</p>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>English ×6</CardTitle>
+            <CardDescription>A=6 … Z=156</CardDescription>
+          </CardHeader>
+          <p className="font-mono text-3xl tabular-nums">{result.sixScale}</p>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Filters</CardTitle>
+            <CardDescription>Katan / 49 / 13 on ordinal</CardDescription>
+          </CardHeader>
+          <p className="font-mono text-sm text-fg">
+            {result.filters.katan} · {result.filters.mod49} · {result.filters.mod13}
+          </p>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Cleaned</CardTitle>
+            <CardDescription>Spaces stripped</CardDescription>
+          </CardHeader>
+          <p className="font-mono text-lg text-fg">{result.cleaned || "—"}</p>
+        </Card>
+      </div>
+
+      {ky ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{ky.name}</CardTitle>
+            <CardDescription>
+              Ordinal and ×6 verified in-engine. Jewish and Hebrew columns are operator-supplied
+              transliterations — not recomputed.
+            </CardDescription>
+          </CardHeader>
+          <dl className="grid grid-cols-2 gap-3 font-mono text-sm sm:grid-cols-4">
+            <div>
+              <dt className="text-xs text-subtle">Ordinal lock</dt>
+              <dd className="mt-0.5 text-fg">
+                {result.ordinal} {result.ordinal === ky.ordinalExpect ? "= lock" : "MISMATCH"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs text-subtle">×6 lock</dt>
+              <dd className="mt-0.5 text-fg">
+                {result.sixScale} {result.sixScale === ky.sixExpect ? "= lock" : "MISMATCH"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs text-subtle">Jewish (operator)</dt>
+              <dd className="mt-0.5 text-fg">{ky.jewishOperator}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-subtle">Hebrew (operator)</dt>
+              <dd className="mt-0.5 text-fg">{ky.hebrewOperator}</dd>
+            </div>
+          </dl>
+        </Card>
+      ) : null}
+
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
@@ -95,6 +172,40 @@ export function GematriaPanel() {
         </div>
         <p className="mt-3 font-mono text-xs text-subtle">
           {TONGUES.length} tongues · 14 tracks · bitwise-deterministic
+        </p>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>1170 → ESAEESA</CardTitle>
+          <CardDescription>
+            Partition 3-1-2-1 residues of 1170. Independent of the phrase above.
+          </CardDescription>
+        </CardHeader>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[32rem] text-left font-mono text-xs">
+            <thead className="text-subtle">
+              <tr className="border-b border-border">
+                <th className="py-2 pr-3 font-medium">Tongue</th>
+                <th className="py-2 pr-3 font-medium">Base</th>
+                <th className="py-2 pr-3 font-medium">Residue</th>
+                <th className="py-2 font-medium">Letter</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ESAEESA.map((r) => (
+                <tr key={r.name} className="border-b border-border/60">
+                  <td className="py-2 pr-3 text-fg">{r.name}</td>
+                  <td className="py-2 pr-3 text-muted">{r.base}</td>
+                  <td className="py-2 pr-3 text-muted">{r.residue}</td>
+                  <td className="py-2 text-fg">{r.letter}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-3 font-mono text-sm tracking-[0.3em] text-fg">
+          {ESAEESA.map((r) => r.letter).join("")}
         </p>
       </Card>
     </div>

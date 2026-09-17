@@ -7,4 +7,5 @@ export type VectorId =
   | "harness"
   | "evidence"
   | "artifacts"
-  | "survey";
+  | "survey"
+  | "planes";

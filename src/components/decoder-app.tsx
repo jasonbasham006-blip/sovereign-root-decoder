@@ -12,6 +12,7 @@ import {
   MapPinned,
   ScanLine,
   ShieldCheck,
+  Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ENGINE_VERSION } from "@/lib/decoder";
@@ -25,11 +26,13 @@ import { HarnessPanel } from "@/components/harness-panel";
 import { EvidencePanel } from "@/components/evidence-panel";
 import { ArtifactsPanel } from "@/components/artifacts-panel";
 import { SurveyPanel } from "@/components/survey-panel";
+import { PlanesPanel } from "@/components/planes-panel";
 
 const NAV: { id: VectorId; label: string; icon: typeof Hash }[] = [
   { id: "overview", label: "Overview", icon: ScanLine },
   { id: "artifacts", label: "Field", icon: MapPinned },
   { id: "survey", label: "Survey", icon: Compass },
+  { id: "planes", label: "Planes", icon: Layers },
   { id: "gematria", label: "Gematria", icon: Hash },
   { id: "corpus", label: "Corpus", icon: Library },
   { id: "lattice", label: "Lattice", icon: CircleDot },
@@ -89,6 +92,7 @@ export function DecoderApp() {
           {vector === "overview" && <OverviewPanel onOpen={setVector} />}
           {vector === "artifacts" && <ArtifactsPanel />}
           {vector === "survey" && <SurveyPanel />}
+          {vector === "planes" && <PlanesPanel />}
           {vector === "gematria" && <GematriaPanel />}
           {vector === "corpus" && <CorpusPanel />}
           {vector === "lattice" && <LatticePanel />}

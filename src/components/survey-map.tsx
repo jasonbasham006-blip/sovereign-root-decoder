@@ -23,7 +23,10 @@ type Props = {
 };
 
 export function SurveyMap({ selectedId, onSelect }: Props) {
-  const sites = useMemo(() => [SURVEY.origin, ...SURVEY.sites], []);
+  const sites = useMemo(
+    () => [SURVEY.origin, ...SURVEY.sites.filter((s) => s.family !== "probe")],
+    [],
+  );
   const rings = [SCALER_KM.gold, SCALER_KM.silver, 158, 284, 325];
 
   const wedge = useMemo(() => {

@@ -239,7 +239,7 @@ export const CONSTRAINED_CORPUS: readonly string[] = [
 ];
 
 export const CALLING_CARD = "MISS ELISABETH CAZENOVE PACKARD";
-export const ENGINE_VERSION = "16.5";
+export const ENGINE_VERSION = "16.17";
 export const SPEC_VERSION = "Build Readiness Package";
 export const PIVOT_INDEX = 49;
 export const PIVOT_LATIN_TARGET = 219;

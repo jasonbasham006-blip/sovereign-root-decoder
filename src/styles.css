@@ -111,3 +111,14 @@
 .tabular {
   font-variant-numeric: tabular-nums;
 }
+
+.leaflet-container {
+  background: var(--color-bg);
+  font-family: var(--font-mono);
+}
+
+.survey-node {
+  background: transparent !important;
+  border: none !important;
+}
+

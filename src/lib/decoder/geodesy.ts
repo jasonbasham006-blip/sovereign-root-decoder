@@ -3,6 +3,7 @@
 const A = 6378137;
 const F = 1 / 298.257223563;
 const B = (1 - F) * A;
+const E2 = F * (2 - F);
 
 export type LatLon = { lat: number; lon: number };
 
@@ -170,4 +171,73 @@ export function meridianCrossing(origin: LatLon, az: number, targetLon: number):
   }
   const km = (lo + hi) / 2;
   return { km, point: vincentyDirect(origin, az, km) };
+}
+
+export function parallelCrossing(origin: LatLon, az: number, targetLat: number): { km: number; point: LatLon } {
+  const north = targetLat > origin.lat;
+  let lo = 0.1;
+  let hi = 500;
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    const p = vincentyDirect(origin, az, mid);
+    if (north) {
+      if (p.lat < targetLat) lo = mid;
+      else hi = mid;
+    } else if (p.lat > targetLat) lo = mid;
+    else hi = mid;
+  }
+  const km = (lo + hi) / 2;
+  return { km, point: vincentyDirect(origin, az, km) };
+}
+
+export function feetToKm(ft: number): number {
+  return (ft * 0.3048) / 1000;
+}
+
+export function toEcef(p: LatLon): { x: number; y: number; z: number } {
+  const phi = (p.lat * Math.PI) / 180;
+  const lam = (p.lon * Math.PI) / 180;
+  const sinPhi = Math.sin(phi);
+  const n = A / Math.sqrt(1 - E2 * sinPhi * sinPhi);
+  const cosPhi = Math.cos(phi);
+  return {
+    x: n * cosPhi * Math.cos(lam),
+    y: n * cosPhi * Math.sin(lam),
+    z: n * (1 - E2) * sinPhi,
+  };
+}
+
+export function fromEcef(x: number, y: number, z: number): LatLon {
+  const lon = (Math.atan2(y, x) * 180) / Math.PI;
+  const p = Math.hypot(x, y);
+  let phi = Math.atan2(z, p * (1 - E2));
+  for (let i = 0; i < 20; i++) {
+    const sinPhi = Math.sin(phi);
+    const n = A / Math.sqrt(1 - E2 * sinPhi * sinPhi);
+    phi = Math.atan2(z + E2 * n * sinPhi, p);
+  }
+  return { lat: (phi * 180) / Math.PI, lon };
+}
+
+export function barycenter(points: LatLon[]): LatLon {
+  let x = 0;
+  let y = 0;
+  let z = 0;
+  for (const p of points) {
+    const c = toEcef(p);
+    x += c.x;
+    y += c.y;
+    z += c.z;
+  }
+  const n = points.length || 1;
+  return fromEcef(x / n, y / n, z / n);
+}
+
+export function sampleGeodesic(origin: LatLon, az: number, maxKm: number, stepKm = 10): LatLon[] {
+  const pts: LatLon[] = [origin];
+  for (let d = stepKm; d <= maxKm; d += stepKm) pts.push(vincentyDirect(origin, az, d));
+  const last = pts[pts.length - 1];
+  const end = vincentyDirect(origin, az, maxKm);
+  if (!last || Math.abs(last.lat - end.lat) > 1e-8 || Math.abs(last.lon - end.lon) > 1e-8) pts.push(end);
+  return pts;
 }
