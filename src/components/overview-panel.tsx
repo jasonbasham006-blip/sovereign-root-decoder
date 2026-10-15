@@ -26,10 +26,11 @@ type Props = {
   onOpen: (id: VectorId) => void;
 };
 
-function statusVariant(status: LedgerStatus): "pass" | "accent" | "default" | "warn" {
+function statusVariant(status: LedgerStatus): "pass" | "accent" | "default" | "warn" | "fail" {
   if (status === "LOCKED") return "pass";
   if (status === "COMPUTED") return "accent";
   if (status === "INGESTED") return "default";
+  if (status === "FAIL_CLOSED") return "fail";
   return "warn";
 }
 
@@ -64,7 +65,9 @@ export function OverviewPanel({ onOpen }: Props) {
                 field {PACKET.locked}/{PACKET.tests.length}
               </Badge>
               <Badge variant="pass">{COUNTS.LOCKED} locked</Badge>
-              <Badge variant="warn">{COUNTS.FAIL_CLOSED} fail-closed</Badge>
+              <Badge variant="accent">{COUNTS.COMPUTED} computed</Badge>
+              <Badge variant="warn">{COUNTS.UNRESOLVED} unresolved</Badge>
+              <Badge variant="fail">{COUNTS.FAIL_CLOSED} fail-closed</Badge>
             </div>
           </div>
           <div className="w-full max-w-xs shrink-0 self-center">
@@ -79,8 +82,8 @@ export function OverviewPanel({ onOpen }: Props) {
             <div>
               <CardTitle>Ingest ledger</CardTitle>
               <CardDescription>
-                Six protocols plus the named dump. Fail-closed items stay dark. No excavation, no
-                invented patents, no legal filing.
+                Six protocols plus the named dump. Fail-closed items stay dark. Pulley matrix
+                stays unresolved. No excavation, no invented patents, no legal filing.
               </CardDescription>
             </div>
             <Button
@@ -161,8 +164,9 @@ export function OverviewPanel({ onOpen }: Props) {
           ))}
         </div>
         <p className="mt-3 font-mono text-xs text-muted">
-          ESAEESA {PROOFS.esaeesa.word} · residue sum {PROOFS.esaeesa.residueSum} ≡{" "}
-          {PROOFS.esaeesa.mod49} (mod 49)
+          ESAEESA {PROOFS.esaeesa.word} · residue-sum {PROOFS.esaeesa.residueSum} ≡{" "}
+          {PROOFS.esaeesa.mod49} (mod 49) · letter-ordinal A=1 {PROOFS.esaeesa.letterOrdinalA1} ≡{" "}
+          {PROOFS.esaeesa.letterOrdinalMod49} (mod 49)
         </p>
         <Button variant="secondary" className="mt-4" onClick={() => onOpen("proofs")}>
           Open full proofs
@@ -179,6 +183,20 @@ const VECTORS: {
   body: string;
   badge?: { label: string; variant: "pass" | "accent" | "default" | "warn" };
 }[] = [
+  {
+    id: "dump",
+    code: "IN",
+    title: "Resource dump",
+    body: "Drop files, paste clipboard, photograph. Hashed, gate-scanned, never LOCKED. Two passes today.",
+    badge: { label: "inbox", variant: "accent" },
+  },
+  {
+    id: "rails",
+    code: "IRE",
+    title: "Integer rails",
+    body: "Garner CRT, H_norm holding register, even-step origin. Live moduli unchanged. Clay stays dark.",
+    badge: { label: "v64 path", variant: "pass" },
+  },
   {
     id: "artifacts",
     code: "A0",
@@ -206,7 +224,7 @@ const VECTORS: {
     id: "corpus",
     code: "L2.C",
     title: "Corpus pivot",
-    body: "Sort titles by Latin sum and lock the position-50 pivot gate.",
+    body: "Latin-sorted position 50 is BAPTIST by a 15-way 219 tie, not a unique gate. Array[49] is BALTIMORE.",
   },
   {
     id: "lattice",

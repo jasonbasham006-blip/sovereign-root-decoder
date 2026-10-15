@@ -1,6 +1,6 @@
 # Sovereign Root Decoder
 
-Bitwise-deterministic research engine **v16.17**.
+Bitwise-deterministic research engine **v16.30**.
 
 Public clone: [github.com/jasonbasham006-blip/sovereign-root-decoder](https://github.com/jasonbasham006-blip/sovereign-root-decoder)
 
@@ -27,7 +27,10 @@ See `SECURITY.md`. No private keys, WIF, or spending credentials are in this tre
 | `src/lib/decoder/hydro-int.ts` | Volume averages m₄₀₀ = 3/35, m₂₂₂ = 1/315 as (N, D) pairs |
 | `src/lib/decoder/bitshift.ts` | Bit-shift protocol: S(k,s)=2k+s, 1118 ≫ 1 = 559 = 13×43, 480-grid → 481 |
 | `src/lib/decoder/planes.ts` | Eight operational planes with 2026-09-17 statuses |
-| `src/lib/decoder/proofs.ts` | L6 gates |
+| `src/lib/decoder/ledger.ts` | Ingest ledger. Item 5 split: corpus 213 LOCKED, Latin 219 COMPUTED (15-way tie), 7×7 pulley UNRESOLVED |
+| `src/lib/decoder/resurrect.ts` | No-resurrection lock. Live M=463072246, X mod 13 = 5. Retired needles GATE_BLOCKED |
+| `tools/SOVEREIGN_VERIFY_CORE.py` | Draft scanner: GATE_PASSED / GATE_BLOCKED |
+| `src/lib/decoder/genesis.ts` | 98-pulse strand (1470/−867/603) and 41-term palindrome knock-off. Different objects |
 | `tests/test_sovereign_invariants.py` | Exact regression tests (CRT, F_101, stencil, gates) |
 
 ## Hydro lock (do not merge)
@@ -47,6 +50,7 @@ npm install
 npm run dev
 npm run typecheck
 python3 tests/test_sovereign_invariants.py
+python3 tools/genesis_loop.py 3
 ```
 
 Decoder kernels: `src/lib/decoder/`. UI: `src/components/`.

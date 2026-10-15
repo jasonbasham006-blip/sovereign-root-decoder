@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
-import { decodePhrase, ESAEESA, KY_TOWNS, TONGUES } from "@/lib/decoder";
+import { decodePhrase, ESAEESA, IDENTIFIER, KY_TOWNS, TONGUES, esaeesaSums } from "@/lib/decoder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 const PRESETS = [
+  "Basham@sovereign-root",
   "BASHAM",
   "JASON DEWAYNE",
   "LIBERTY LANTERN",
@@ -15,6 +16,8 @@ const PRESETS = [
   "PAINTSVILLE",
   "STAFFORDSVILLE",
 ];
+
+const ESAE_SUMS = esaeesaSums();
 
 export function GematriaPanel() {
   const [phrase, setPhrase] = useState("LIBERTY LANTERN");
@@ -65,6 +68,51 @@ export function GematriaPanel() {
             </Button>
           ))}
         </div>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <CardTitle>Identifier word</CardTitle>
+              <CardDescription>
+                {IDENTIFIER.word} · {IDENTIFIER.letters} letters. Fetch key is not a title.
+              </CardDescription>
+            </div>
+            <Badge variant={IDENTIFIER.zero.pass && IDENTIFIER.mixed.pass ? "pass" : "fail"}>
+              475 / 494 named
+            </Badge>
+          </div>
+        </CardHeader>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <div className="rounded-md bg-elevated p-3 shadow-[var(--shadow-border)]">
+            <div className="font-mono text-xs text-muted">A=0 F+R</div>
+            <p className="mt-1 font-mono text-2xl tabular-nums text-fg">{IDENTIFIER.zero.sum}</p>
+            <p className="mt-1 font-mono text-xs text-subtle">
+              {IDENTIFIER.zero.f}+{IDENTIFIER.zero.r} = {IDENTIFIER.zero.factor}
+            </p>
+          </div>
+          <div className="rounded-md bg-elevated p-3 shadow-[var(--shadow-border)]">
+            <div className="font-mono text-xs text-muted">Mixed A=1 F + A=0 R</div>
+            <p className="mt-1 font-mono text-2xl tabular-nums text-fg">{IDENTIFIER.mixed.sum}</p>
+            <p className="mt-1 font-mono text-xs text-subtle">
+              {IDENTIFIER.mixed.f}+{IDENTIFIER.mixed.r} = {IDENTIFIER.mixed.factor}
+            </p>
+          </div>
+          <div className="rounded-md bg-elevated p-3 shadow-[var(--shadow-border)]">
+            <div className="font-mono text-xs text-muted">Dual A=1 F+R</div>
+            <p className="mt-1 font-mono text-2xl tabular-nums text-fg">{IDENTIFIER.dualOrdinal.sum}</p>
+            <p className="mt-1 font-mono text-xs text-subtle">
+              {IDENTIFIER.dualOrdinal.f}+{IDENTIFIER.dualOrdinal.r} = {IDENTIFIER.dualOrdinal.factor}
+            </p>
+          </div>
+        </div>
+        <p className="mt-3 font-mono text-xs leading-relaxed text-muted">
+          1118 ≡ {IDENTIFIER.prefix1118.mod49} (mod 49) ≡ 0 (mod 13). 9231118 ≡{" "}
+          {IDENTIFIER.prefix9231118.mod49} (mod 49). Concatenated 111118923 ≡{" "}
+          {IDENTIFIER.concat111118923.concatenatedMod49} (mod 49). Split 1111+18+923 ≡{" "}
+          {IDENTIFIER.concat111118923.splitMod49} God Seal. Different objects.
+        </p>
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -179,7 +227,7 @@ export function GematriaPanel() {
         <CardHeader>
           <CardTitle>1170 → ESAEESA</CardTitle>
           <CardDescription>
-            Partition 3-1-2-1 residues of 1170. Independent of the phrase above.
+            Partition 3-1-2-1 residues of 1170. Residue-sum and letter-ordinal are different objects.
           </CardDescription>
         </CardHeader>
         <div className="overflow-x-auto">
@@ -206,6 +254,9 @@ export function GematriaPanel() {
         </div>
         <p className="mt-3 font-mono text-sm tracking-[0.3em] text-fg">
           {ESAEESA.map((r) => r.letter).join("")}
+        </p>
+        <p className="mt-2 font-mono text-xs text-muted">
+          Residue-sum {ESAE_SUMS.residueSum} · letter-ordinal A=1 {ESAE_SUMS.letterOrdinalA1} = residue-sum + 7
         </p>
       </Card>
     </div>

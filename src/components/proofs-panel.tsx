@@ -4,9 +4,19 @@ import { useEffect, useMemo, useState } from "react";
 import {
   COMPILATION,
   CRATE_XRF,
+  CLEAN_GATE,
+  FIELD101,
+  GROUND,
+  PHASE3,
+  PHASE_JUMPS,
+  PULSE,
+  PULSE_OFFSET,
   evaluateXrf,
+  formatGateScan,
+  retiredSample,
   runHydro,
   runProofs,
+  scanDraft,
   syndromeCommitment,
   type XrfZone,
 } from "@/lib/decoder";
@@ -27,6 +37,8 @@ export function ProofsPanel() {
   const [pb, setPb] = useState<number>(CRATE_XRF.pb);
   const [commit, setCommit] = useState<string>("…");
   const [commitPass, setCommitPass] = useState<boolean | null>(null);
+  const [draft, setDraft] = useState("");
+  const gate = useMemo(() => scanDraft(draft), [draft]);
 
   const xrf = useMemo(() => evaluateXrf({ zone, ag, cu, au, pb }), [zone, ag, cu, au, pb]);
 
@@ -74,6 +86,101 @@ export function ProofsPanel() {
             </div>
           ))}
         </div>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <CardTitle>98-pulse strand</CardTitle>
+              <CardDescription>
+                Two 21-term phases. Jump template repeats. Phase 2 = phase 1 + {PULSE_OFFSET}. Not the palindrome.
+              </CardDescription>
+            </div>
+            <Badge variant={PULSE.pass ? "pass" : "fail"}>{PULSE.pass ? "LOCKED" : "FAIL"}</Badge>
+          </div>
+        </CardHeader>
+        <p className="font-mono text-xs leading-relaxed text-muted">
+          jumps [{PHASE_JUMPS.join(", ")}]
+        </p>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="rounded-md bg-elevated p-3 shadow-[var(--shadow-border)]">
+            <div className="font-mono text-xs text-muted">Bridge</div>
+            <p className="mt-1 font-mono text-2xl tabular-nums text-fg">{PULSE.bridge}</p>
+            <p className="font-mono text-xs text-subtle">1470 → 603</p>
+          </div>
+          <div className="rounded-md bg-elevated p-3 shadow-[var(--shadow-border)]">
+            <div className="font-mono text-xs text-muted">Offset</div>
+            <p className="mt-1 font-mono text-2xl tabular-nums text-fg">{PULSE_OFFSET}</p>
+          </div>
+          <div className="rounded-md bg-elevated p-3 shadow-[var(--shadow-border)]">
+            <div className="font-mono text-xs text-muted">Phase 3 start</div>
+            <p className="mt-1 font-mono text-2xl tabular-nums text-fg">{PULSE.phase3Start}</p>
+          </div>
+          <div className="rounded-md bg-elevated p-3 shadow-[var(--shadow-border)]">
+            <div className="font-mono text-xs text-muted">Phase 3 end</div>
+            <p className="mt-1 font-mono text-2xl tabular-nums text-fg">{PULSE.phase3End}</p>
+          </div>
+        </div>
+        <p className="mt-3 font-mono text-xs text-muted">
+          Phase 3 [{PHASE3.join(", ")}]. F_101: 23²≡{FIELD101.sq23} not 79. X_CRT≡{FIELD101.xMod101} not 0.
+          603→79 at {FIELD101.contact79}, →23 at {FIELD101.contact23}. Axiom G forbidden.
+          K_SIGMA ≡ {GROUND.kSigma.mod49} (mod 49); +7 patch is operator. Clay open.
+        </p>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <CardTitle>No-resurrection lock</CardTitle>
+              <CardDescription>
+                Clean scan {CLEAN_GATE.status}. Retired needles stay dead. Live integers only.
+              </CardDescription>
+            </div>
+            <Badge variant={gate.status === "GATE_PASSED" ? "pass" : "fail"}>{gate.status}</Badge>
+          </div>
+        </CardHeader>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="rounded-md bg-elevated p-3 shadow-[var(--shadow-border)]">
+            <div className="font-mono text-xs text-muted">49×1118×79×107</div>
+            <p className="mt-1 font-mono text-lg tabular-nums text-fg">{gate.live.crtM}</p>
+          </div>
+          <div className="rounded-md bg-elevated p-3 shadow-[var(--shadow-border)]">
+            <div className="font-mono text-xs text-muted">3398738 mod 13</div>
+            <p className="mt-1 font-mono text-lg tabular-nums text-fg">{gate.live.xMod13}</p>
+          </div>
+          <div className="rounded-md bg-elevated p-3 shadow-[var(--shadow-border)]">
+            <div className="font-mono text-xs text-muted">Gate 18</div>
+            <p className="mt-1 font-mono text-lg tabular-nums text-fg">{gate.live.gate18}</p>
+          </div>
+          <div className="rounded-md bg-elevated p-3 shadow-[var(--shadow-border)]">
+            <div className="font-mono text-xs text-muted">Live arithmetic</div>
+            <p className="mt-1 font-mono text-lg text-fg">{gate.live.pass ? "hold" : "fail"}</p>
+          </div>
+        </div>
+        <label className="mt-4 block font-mono text-xs text-muted" htmlFor="gate-draft">
+          Scan a draft
+        </label>
+        <textarea
+          id="gate-draft"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder="Paste a draft. Empty stays GATE_PASSED."
+          rows={4}
+          className="mt-1 w-full rounded-sm bg-elevated px-3 py-2 font-mono text-sm text-fg shadow-[var(--shadow-border)] placeholder:text-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        />
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button variant="secondary" onClick={() => setDraft(retiredSample())}>
+            Feed retired needles
+          </Button>
+          <Button variant="secondary" onClick={() => setDraft("")}>
+            Clear
+          </Button>
+        </div>
+        <pre className="mt-3 overflow-x-auto whitespace-pre-wrap rounded-md bg-elevated p-3 font-mono text-xs leading-relaxed text-muted shadow-[var(--shadow-border)]">
+          {formatGateScan(gate)}
+        </pre>
       </Card>
 
       <Card>
@@ -134,7 +241,7 @@ export function ProofsPanel() {
                               : "default"
                       }
                     >
-                      {c.status}
+                      {c.status === "FORBIDDEN" ? "NOT EARNED" : c.status}
                     </Badge>
                   </td>
                   <td className="py-2">
@@ -411,13 +518,17 @@ export function ProofsPanel() {
         <CardHeader>
           <CardTitle>ESAEESA — base 1170</CardTitle>
           <CardDescription>
-            Tongue residues of 1170 in 3-1-2-1 partition order. 0-index A.
+            Tongue residues of 1170 in 3-1-2-1 partition order. 0-index A. Residue-sum ≠ letter-ordinal.
           </CardDescription>
         </CardHeader>
         <p className="font-mono text-3xl tracking-[0.35em] text-fg">{REPORT.esaeesa.word}</p>
         <p className="mt-2 font-mono text-xs text-muted">
-          residues {REPORT.esaeesa.residues.join(", ")} · sum {REPORT.esaeesa.residueSum} ≡{" "}
+          residues {REPORT.esaeesa.residues.join(", ")} · residue-sum {REPORT.esaeesa.residueSum} ≡{" "}
           {REPORT.esaeesa.mod49} (mod 49)
+        </p>
+        <p className="mt-1 font-mono text-xs text-muted">
+          letter-ordinal A=1 {REPORT.esaeesa.letterOrdinalA1} ≡ {REPORT.esaeesa.letterOrdinalMod49}{" "}
+          (mod 49) = residue-sum + 7
         </p>
       </Card>
 

@@ -36,6 +36,9 @@ export class PromotionGate {
   verify(id: string, matrix: Q[][] | null): PromotionResult {
     const thm = this.registry.get(id);
     if (!thm) return { id, ok: false, reason: "missing theorem" };
+    if (thm.status === "FORBIDDEN") {
+      return { id, ok: false, reason: "FORBIDDEN — will not promote" };
+    }
     for (const tag of thm.preserved) {
       if (!ALLOWED.has(tag)) return { id, ok: false, reason: `unsafe tag ${tag}` };
     }
@@ -62,6 +65,8 @@ export function hydroPromotion(): {
   p3Identity: PromotionResult;
   p7: PromotionResult;
   casimir: PromotionResult;
+  axiomG: PromotionResult;
+  clayNs: PromotionResult;
 } {
   const gate = new PromotionGate();
   gate.register({
@@ -113,11 +118,27 @@ export function hydroPromotion(): {
     conclusion: "δ² ζ(-1/2) named",
     preserved: ["GAUSS_BONNET_INVARIANT"],
   });
+  gate.register({
+    id: "AXIOM-G",
+    status: "FORBIDDEN",
+    premises: [],
+    conclusion: "0=1 in ℤ",
+    preserved: [],
+  });
+  gate.register({
+    id: "CLAY-NS",
+    status: "FORBIDDEN",
+    premises: [],
+    conclusion: "smooth NSE global bound from 1118",
+    preserved: [],
+  });
 
   const p3Gram = gate.verify("SOS-P3-GRAM", p3Matrix());
   const p5Gram = gate.verify("SOS-P5-GRAM", p5Matrix());
   const p3Identity = gate.verify("SUPREMUM-P3-IDENTITY", null);
   const p7 = gate.verify("SUPREMUM-P7", null);
   const casimir = gate.verify("CASIMIR-VARIATION", null);
-  return { p3Gram, p5Gram, p3Identity, p7, casimir };
+  const axiomG = gate.verify("AXIOM-G", p3Matrix());
+  const clayNs = gate.verify("CLAY-NS", p3Matrix());
+  return { p3Gram, p5Gram, p3Identity, p7, casimir, axiomG, clayNs };
 }

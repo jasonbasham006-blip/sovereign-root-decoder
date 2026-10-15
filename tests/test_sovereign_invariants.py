@@ -46,6 +46,46 @@ def test_crt_core():
     assert reconstructed == x
     assert x < 4_327_778
 
+    demo_m = [101, 103, 107, 109]
+    demo_r = [23, 45, 12, 89]
+    dx = []
+    for i, m in enumerate(demo_m):
+        t = demo_r[i]
+        for j in range(i):
+            t = ((t - dx[j]) * pow(demo_m[j], -1, m)) % m
+        dx.append(t)
+    dval = dx[0]
+    prod = 1
+    for i in range(1, 4):
+        prod *= demo_m[i - 1]
+        dval += dx[i] * prod
+    assert dval == 79_321_787
+    assert [dval % m for m in demo_m] == demo_r
+    assert [0 + 2 * j for j in range(8)] == [0, 2, 4, 6, 8, 10, 12, 14]
+    assert 5 * 100 * 36 // 12 == 1500
+    assert 22 * 23 // 2 == 253 == 11 * 23
+    u = [500, 800, 1000, 1150, 1350]
+    assert all(x % 2 == 0 for x in u)
+    lap = -u[4] + 16 * u[3] - 30 * u[2] + 16 * u[1] - u[0]
+    assert lap == -650
+    assert 12 * lap == -7800
+    assert Fraction(12 * lap, 48) == Fraction(-325, 2)
+    us = [200, 500, 800, 1150, 1350, 1500]
+    sob = us[5] - 5 * us[4] + 10 * us[3] - 10 * us[2] + 5 * us[1] - us[0]
+    assert sob == 550
+    assert 12 * sob * sob == 3_630_000
+    assert Fraction(3_630_000, 1024) == Fraction(226875, 64)
+    assert 66 * 40 * 40 == 105_600
+    assert 66 * 160 * 160 == 1_689_600
+    assert 1_689_600 // 105_600 == 16
+    assert (1_689_600 // 8) // (105_600 // 4) == 8
+    assert 50_000 * 35_600 == 1_780_000_000
+    es = [600, 800, 1000, 800, 600]
+    es_lap = -es[4] + 16 * es[3] - 30 * es[2] + 16 * es[1] - es[0]
+    assert es_lap == -5600
+    uni = [1000] * 5
+    assert -uni[4] + 16 * uni[3] - 30 * uni[2] + 16 * uni[1] - uni[0] == 0
+
     n = 49 * 43 * 18 * 13
     assert n == 493_038
     assert x % n == 440_510
@@ -140,6 +180,244 @@ def test_legendre_shell_counts():
             if 4**a * (8 * b + 7) <= n_max
         )
         assert count == expected
+
+
+def test_rns_primes_and_true_pull():
+    def is_odd_prime(n: int) -> bool:
+        if n < 3 or n % 2 == 0:
+            return False
+        d = 3
+        while d * d <= n:
+            if n % d == 0:
+                return False
+            d += 2
+        return True
+
+    primes = (65521, 65519, 65551)
+    assert all(is_odd_prime(p) for p in primes)
+    assert 766 % 49 == 31
+
+
+def test_esaeesa_residue_sum_is_not_letter_ordinal():
+    bases = (22, 24, 26, 22, 22, 32, 26)
+    residues = tuple(1170 % b for b in bases)
+    letters = "".join(chr(65 + r) for r in residues)
+    residue_sum = sum(residues)
+    letter_ordinal_a1 = sum(ord(ch) - 64 for ch in letters)
+    assert letters == "ESAEESA"
+    assert residues == (4, 18, 0, 4, 4, 18, 0)
+    assert residue_sum == 48
+    assert letter_ordinal_a1 == 55
+    assert letter_ordinal_a1 == residue_sum + 7
+    assert letter_ordinal_a1 % 49 == 6
+    assert residue_sum % 49 == 48
+
+
+def _tongue_word_value(n: int, base: int) -> int:
+    if n <= 0:
+        return 0
+    total = 0
+    temp = n
+    while temp > 0:
+        total += temp % base
+        temp //= base
+    return total
+
+
+def test_baptist_latin_is_219_and_not_unique():
+    word = "BAPTIST"
+    fw = [sum((ord(ch) - 65 + o) for ch in word) for o in range(7)]
+    rv = [sum(25 - (ord(ch) - 65) + o for ch in word) for o in range(7)]
+    assert fw[0] == 80
+    assert fw[1] == 87
+    assert rv[0] == 95
+    latin = sum(_tongue_word_value(v, 26) for v in fw + rv)
+    geez = sum(_tongue_word_value(v, 26) for v in fw + rv)
+    assert latin == 219
+    assert geez == 219
+    assert 219 not in (80, 87, 95)
+    assert all((87 + 7 * k) != 219 for k in range(40))
+    assert all((80 + 7 * k) != 219 for k in range(40))
+
+
+def test_no_resurrection_lock():
+    import pathlib
+    import subprocess
+    import sys
+
+    tool = pathlib.Path(__file__).resolve().parents[1] / "tools" / "SOVEREIGN_VERIFY_CORE.py"
+    assert 49 * 1118 * 79 * 107 == 463_072_246
+    assert 3_398_738 % 13 == 5
+    assert ((718 ^ 892) & 1118) == 18
+    assert 463_072_246 != 462_034_366
+
+    clean = subprocess.run(
+        [sys.executable, str(tool), "Gate18 = 18; remainder 5; modulus 463072246"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert clean.returncode == 0
+    assert "GATE_PASSED" in clean.stdout
+
+    poison = "+" + "28.54" + "," + "do not " + "file" + "," + "46203" + "4366"
+    blocked = subprocess.run(
+        [sys.executable, str(tool), poison],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert blocked.returncode == 1
+    assert "GATE_BLOCKED" in blocked.stdout
+    assert "CLASS DRIFT" in blocked.stdout
+
+
+def test_pulse_strand_and_mirror():
+    jumps = [98, 7]
+    for n in range(2, 8):
+        jumps += [98, 98, 7 * n]
+    assert jumps == [
+        98, 7, 98, 98, 14, 98, 98, 21, 98, 98, 28, 98, 98, 35, 98, 98, 42, 98, 98, 49,
+    ]
+    seed = [0]
+    x = 0
+    for j in jumps:
+        x += j
+        seed.append(x)
+    assert seed[-1] == 1470 and seed[0] == 0
+    phase2 = [v + 603 for v in seed]
+    assert phase2[0] == 603 and phase2[-1] == 2073
+    assert 1470 - 867 == 603
+    phase3 = [v + 1206 for v in seed]
+    assert phase3[0] == 1206 and phase3[-1] == 2676
+
+    def msb(n):
+        if n <= 0:
+            return 0
+        b = 1
+        while b * 2 <= n:
+            b *= 2
+        return b
+
+    row = [
+        0, 1, 4, 5, 7, 8, 9, 11, 16, 18, 25, 31, 43, 60, 63, 81, 88, 92, 98, 101, 118,
+        101, 98, 92, 88, 81, 63, 60, 43, 31, 25, 18, 16, 11, 9, 8, 7, 5, 4, 1, 0,
+    ]
+    assert row == row[::-1] and len(row) == 41
+    assert msb(5) == 4 and msb(9) == 8 and msb(7) == 4 and msb(118) == 64
+    assert set(seed) & set(row) == {0, 98}
+
+
+def test_field101_hhl_and_crt_residue():
+    assert (23 * 23 - 23 - 1) % 101 == 0
+    assert (79 * 79 - 79 - 1) % 101 == 0
+    assert (23 * 23) % 101 == 24
+    assert 3_398_738 % 101 == 88
+    assert 316 & 217 == 24
+    assert (98 + 3) % 101 == 0
+
+    def term(seed, step):
+        x = seed
+        if step == 0:
+            return x
+        x += 98
+        if step == 1:
+            return x
+        x += 7
+        if step == 2:
+            return x
+        n = 2
+        s = 2
+        while s < step:
+            x += 98
+            s += 1
+            if s == step:
+                return x
+            x += 98
+            s += 1
+            if s == step:
+                return x
+            x += 7 * n
+            s += 1
+            n += 1
+            if s == step:
+                return x
+        return x
+
+    assert term(0, 20) == 1470
+    assert term(603, 20) == 2073
+    assert term(603, 53) % 101 == 79
+    assert term(603, 65) % 101 == 23
+    dims = [1, 51, 316, 217, 882, 1118, 2340, 3_398_738]
+    a = sum(d << k for k, d in enumerate(dims))
+    assert a % 1118 == 461
+
+
+def test_ground_factorizations_and_ksigma():
+    assert 4 * 5 * 71 == 1420
+    assert 13 * 71 == 923
+    assert 923 * 20 / 13 == 1420
+    assert 2 * 13 * 43 == 1118
+    assert 1118 >> 1 == 559 == 13 * 43
+    assert 410 + 541 + 26 + 102 + 26 + 13 == 1118
+    assert (300 + 40 + 70) == 410
+    assert (10 + 300 + 200 + 1 + 30) == 541
+    assert (10 + 5 + 6 + 5) == 26
+    assert (1 + 30 + 5 + 10 + 50 + 6) == 102
+    assert (1 + 8 + 4) == 13
+    k = 3_398_738 * 828 + 8 * 219 + 2
+    assert k == 2_814_156_818
+    assert k % 49 == 39
+    assert 3_398_738 % 49 == 0
+    assert (k + 5) % 49 == 44
+    assert 2 + 1 + 19 + 8 + 1 + 13 == 44
+
+
+def test_dump_integer_extract_and_no_lock():
+    import re
+
+    def extract(text):
+        found = re.findall(r"\b\d{2,12}\b", text)
+        uniq = sorted({int(x) for x in found})
+        return uniq[:40]
+
+    assert extract("K_SIGMA 2814156818 and 39 mod 49") == [39, 49, 2814156818]
+    assert extract("1 and 7 stay single-digit") == []
+    # dump protocol: never a LOCK from extracted integers alone
+    ints = extract("1420/923 = 20/13")
+    assert 1420 in ints and 923 in ints
+    assert "LOCK" not in "INGESTED"
+
+
+def test_identifier_word_and_prefixes():
+    word = "BASHAMSOVEREIGNROOT"
+    assert len(word) == 19
+
+    def fwd(s, off=0):
+        return sum(ord(c) - 65 + off for c in s)
+
+    def rev(s, off=0):
+        return sum(25 - (ord(c) - 65) + off for c in s)
+
+    f0, r0 = fwd(word, 0), rev(word, 0)
+    f1, r1 = fwd(word, 1), rev(word, 1)
+    assert (f0, r0, f0 + r0) == (207, 268, 475) == (207, 268, 25 * 19)
+    assert f1 + r0 == 494 == 26 * 19
+    assert f1 + r1 == 513 == 27 * 19
+    assert 1118 % 49 == 40 and 1118 % 13 == 0 and 1118 % 18 == 2
+    assert 2 * 13 * 43 == 1118
+    assert 9_231_118 % 49 == 8 and 9_231_118 % 13 == 0
+    assert 923 + 1118 == 2041 and 923 * 1118 == 1_031_914
+    assert 111_118_923 % 49 == 6
+    assert (1111 + 18 + 923) % 49 == 43 == 1170 % 49
+    for surface in (
+        "Basham@sovereign-root",
+        "BASHAM@SOVEREIGN-ROOT",
+        "Basham@Sovereign-root",
+        "basham@sovereign-root",
+    ):
+        letters = "".join(ch for ch in surface.upper() if "A" <= ch <= "Z")
+        assert letters == word
 
 
 def test_hardware_gates():

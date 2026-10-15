@@ -1,3 +1,5 @@
+import { esaeesaSums } from "./gematria";
+
 export type GateResult = {
   id: string;
   label: string;
@@ -15,7 +17,15 @@ export type ProofReport = {
   r19Error: number;
   r19Pass: boolean;
   phiCheck: number;
-  esaeesa: { residues: number[]; word: string; residueSum: number; mod49: number; pass: boolean };
+  esaeesa: {
+    residues: number[];
+    word: string;
+    residueSum: number;
+    mod49: number;
+    letterOrdinalA1: number;
+    letterOrdinalMod49: number;
+    pass: boolean;
+  };
   allPass: boolean;
 };
 
@@ -34,9 +44,7 @@ export function runProofs(): ProofReport {
   const r19Error = Math.abs(r19 - R19_REAL) / R19_REAL;
   const r19Pass = r19Error < 1e-5;
   const phiCheck = 963.8142 / PHI;
-  const residues = [1170 % 22, 1170 % 24, 1170 % 26, 1170 % 22, 1170 % 22, 1170 % 32, 1170 % 26];
-  const word = residues.map((r) => String.fromCharCode(65 + r)).join("");
-  const residueSum = residues.reduce((a, b) => a + b, 0);
+  const sums = esaeesaSums();
 
   const gates: GateResult[] = [
     {
@@ -90,11 +98,17 @@ export function runProofs(): ProofReport {
   ];
 
   const esaeesa = {
-    residues,
-    word,
-    residueSum,
-    mod49: residueSum % 49,
-    pass: word === "ESAEESA" && residueSum % 49 === 48,
+    residues: sums.residues,
+    word: sums.word,
+    residueSum: sums.residueSum,
+    mod49: sums.residueMod49,
+    letterOrdinalA1: sums.letterOrdinalA1,
+    letterOrdinalMod49: sums.letterOrdinalMod49,
+    pass:
+      sums.word === "ESAEESA" &&
+      sums.residueSum === 48 &&
+      sums.letterOrdinalA1 === 55 &&
+      sums.letterOrdinalA1 === sums.residueSum + 7,
   };
 
   return {

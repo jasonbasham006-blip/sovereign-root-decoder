@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import {
   ARTIFACTS,
+  VESSEL,
   runPacket,
   type ArtifactId,
 } from "@/lib/decoder";
@@ -26,6 +27,35 @@ export function ArtifactsPanel() {
 
   return (
     <div className="flex flex-col gap-4">
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <CardTitle>Vessel register</CardTitle>
+              <CardDescription>
+                Punches and drawing from the photo batch. Not a title.
+              </CardDescription>
+            </div>
+            <Badge variant="pass">{VESSEL.punch}</Badge>
+          </div>
+        </CardHeader>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <div className="rounded-md bg-elevated p-3 font-mono text-xs leading-relaxed text-muted shadow-[var(--shadow-border)]">
+            <p className="text-fg">Punch {VESSEL.punch} · not Revere / PR</p>
+            <p className="mt-1">Scale display {VESSEL.scaleDisplay} · unit not proven · 11.90 stays a different claim</p>
+          </div>
+          <div className="rounded-md bg-elevated p-3 font-mono text-xs leading-relaxed text-muted shadow-[var(--shadow-border)]">
+            <p className="text-fg">
+              Per pale · dexter a bend · sinister {VESSEL.blazon.sinister}
+            </p>
+            <p className="mt-1">
+              Sinister ordinary is Avery-shaped if the roundels are bezants. Avery crest (lion's
+              gambs) does not match the bird. Cazenove tower does not match. Dexter unnamed.
+            </p>
+          </div>
+        </div>
+      </Card>
+
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-start justify-between gap-3">

@@ -1,4 +1,13 @@
-import { CONSTRAINED_CORPUS, TONGUES, type TongueName } from "./corpus";
+import {
+  CONSTRAINED_CORPUS,
+  KEY_ELEMENTS,
+  NARA_TITLES,
+  PIVOT_INDEX,
+  PIVOT_LATIN_TARGET,
+  TUNING_BOOKS,
+  TONGUES,
+  type TongueName,
+} from "./corpus";
 
 export function cleanText(text: string): string {
   return text.replace(/[ \-']/g, "");
@@ -135,6 +144,78 @@ export function tongueResidues(n: number): TongueResidue[] {
 }
 
 export const ESAEESA = tongueResidues(1170);
+
+export function esaeesaSums(): {
+  residues: number[];
+  word: string;
+  residueSum: number;
+  residueMod49: number;
+  letterOrdinalA1: number;
+  letterOrdinalMod49: number;
+} {
+  const residues = ESAEESA.map((r) => r.residue);
+  const word = ESAEESA.map((r) => r.letter).join("");
+  const residueSum = residues.reduce((a, b) => a + b, 0);
+  const letterOrdinalA1 = ESAEESA.reduce((a, r) => a + (r.letter.charCodeAt(0) - 64), 0);
+  return {
+    residues,
+    word,
+    residueSum,
+    residueMod49: residueSum % 49,
+    letterOrdinalA1,
+    letterOrdinalMod49: letterOrdinalA1 % 49,
+  };
+}
+
+export type PivotAudit = {
+  corpusLength: number;
+  books: number;
+  keys: number;
+  nara: number;
+  arrayIndex49: string;
+  baptistArrayIndex: number;
+  baptistSimple: { a0: number; a1: number; r0: number };
+  baptistLatin: number;
+  baptistGeez: number;
+  latin219Count: number;
+  latin219Titles: string[];
+  sortedIndex49: string;
+  baptistSortedIndex: number;
+  below219: number;
+  pulleyPresent: false;
+  latinIdentityHolds: boolean;
+};
+
+/** Independent of simple A=1 gematria. 219 is the 14-track Latin word sum. */
+export function auditPivot(): PivotAudit {
+  const decoded = decodeCorpus();
+  const sorted = [...decoded].sort((a, b) => a.final.Latin - b.final.Latin);
+  const baptist = decoded.find((d) => d.text === "BAPTIST");
+  const latin219Titles = decoded.filter((d) => d.final.Latin === 219).map((d) => d.text);
+  const baptistLatin = baptist?.final.Latin ?? -1;
+  return {
+    corpusLength: CONSTRAINED_CORPUS.length,
+    books: TUNING_BOOKS.length,
+    keys: KEY_ELEMENTS.length,
+    nara: NARA_TITLES.length,
+    arrayIndex49: CONSTRAINED_CORPUS[49] ?? "",
+    baptistArrayIndex: CONSTRAINED_CORPUS.indexOf("BAPTIST"),
+    baptistSimple: {
+      a0: forwardGematria("BAPTIST", 0),
+      a1: forwardGematria("BAPTIST", 1),
+      r0: reverseGematria("BAPTIST", 0),
+    },
+    baptistLatin,
+    baptistGeez: baptist?.final["Ge'ez"] ?? -1,
+    latin219Count: latin219Titles.length,
+    latin219Titles,
+    sortedIndex49: sorted[PIVOT_INDEX]?.text ?? "",
+    baptistSortedIndex: sorted.findIndex((d) => d.text === "BAPTIST"),
+    below219: decoded.filter((d) => d.final.Latin < 219).length,
+    pulleyPresent: false,
+    latinIdentityHolds: baptistLatin === PIVOT_LATIN_TARGET,
+  };
+}
 
 export const KY_TOWNS = [
   {

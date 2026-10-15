@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import {
   CONSTRAINED_CORPUS,
-  decodeCorpus,
   PIVOT_INDEX,
   PIVOT_LATIN_TARGET,
   TONGUES,
+  auditPivot,
+  decodeCorpus,
 } from "@/lib/decoder";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const DECODED = decodeCorpus(CONSTRAINED_CORPUS);
+const PIVOT = auditPivot();
 
 export function CorpusPanel() {
   const [query, setQuery] = useState("");
@@ -23,7 +25,6 @@ export function CorpusPanel() {
   );
 
   const pivot = sorted[PIVOT_INDEX];
-  const pivotOk = pivot?.final.Latin === PIVOT_LATIN_TARGET;
   const aggregates = useMemo(() => {
     const sums = Object.fromEntries(TONGUES.map(([n]) => [n, 0])) as Record<string, number>;
     for (const r of DECODED) {
@@ -55,22 +56,33 @@ export function CorpusPanel() {
             <div>
               <CardTitle>Constrained Corpus</CardTitle>
               <CardDescription>
-                {CONSTRAINED_CORPUS.length} items · tuning books, key elements, NARA titles.
+                {CONSTRAINED_CORPUS.length} items · {PIVOT.books} tuning · {PIVOT.keys} keys ·{" "}
+                {PIVOT.nara} NARA.
               </CardDescription>
             </div>
-            <Badge variant={pivotOk ? "pass" : "warn"}>
-              Pivot {pivotOk ? "locked" : "drift"}
-            </Badge>
+            <div className="flex flex-wrap gap-1.5">
+              <Badge variant={PIVOT.latinIdentityHolds ? "pass" : "fail"}>
+                Latin {PIVOT.baptistLatin}
+              </Badge>
+              <Badge variant="accent">15-way tie</Badge>
+              <Badge variant="warn">pulley unresolved</Badge>
+            </div>
           </div>
         </CardHeader>
         {pivot && (
           <div className="rounded-lg bg-elevated p-4 shadow-[var(--shadow-border)]">
             <p className="font-mono text-xs uppercase tracking-widest text-muted">
-              Position 50 pivot gate
+              Position 50 after stable Latin sort — not a unique gate
             </p>
             <p className="mt-1 font-display text-xl text-fg">{pivot.text}</p>
             <p className="mt-1 font-mono text-sm tabular-nums text-muted">
-              Latin {pivot.final.Latin} · target {PIVOT_LATIN_TARGET}
+              14-track Latin {pivot.final.Latin} · target {PIVOT_LATIN_TARGET} · {PIVOT.latin219Count}{" "}
+              titles share 219
+            </p>
+            <p className="mt-2 font-mono text-xs leading-relaxed text-subtle">
+              Array[49] = {PIVOT.arrayIndex49}. BAPTIST sits at array index {PIVOT.baptistArrayIndex}.
+              Simple A=0 / A=1 / reverse = {PIVOT.baptistSimple.a0} / {PIVOT.baptistSimple.a1} /{" "}
+              {PIVOT.baptistSimple.r0} — those are not 219. 7×7 pulley is not in this tree.
             </p>
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
               {Object.entries(pivot.final).map(([tongue, val]) => (
@@ -105,7 +117,9 @@ export function CorpusPanel() {
       <Card>
         <CardHeader>
           <CardTitle>Sorted titles</CardTitle>
-          <CardDescription>Ordered by Latin word sum. First 49 are the filtered baseline.</CardDescription>
+          <CardDescription>
+            Ordered by Latin word sum. First 49 are the filtered baseline, not a pulley matrix.
+          </CardDescription>
         </CardHeader>
         <div className="mb-3 flex flex-col gap-2 sm:flex-row">
           <Input
@@ -122,6 +136,7 @@ export function CorpusPanel() {
           {visible.map((item) => {
             const idx = sorted.indexOf(item);
             const isPivot = idx === PIVOT_INDEX;
+            const isTie = item.final.Latin === PIVOT_LATIN_TARGET;
             return (
               <li
                 key={`${item.text}-${idx}`}
@@ -134,6 +149,11 @@ export function CorpusPanel() {
                     {idx + 1}
                   </span>
                   <span className="truncate">{item.text}</span>
+                  {isTie && (
+                    <span className="shrink-0 font-mono text-[10px] uppercase tracking-wide text-subtle">
+                      219
+                    </span>
+                  )}
                 </span>
                 <span className="shrink-0 font-mono text-xs tabular-nums text-muted">
                   {item.final.Latin}

@@ -397,7 +397,7 @@ export function hydroClaims(): HydroClaim[] {
       layer: "C",
       status: "FORBIDDEN",
       value: "F₁₀₁ ↛ ℝ³",
-      note: "Modular rank checks cannot promote to continuum regularity. Quarantine C→B and C→A.",
+      note: "Labeled in this decoder, by this engine, not by Clay or an outside board. Finite modular ranks are allowed and already computed. They do not yet entail smooth solutions on ℝ³. The missing step is the estimate that would carry a discrete bound to every admissible solution. That step is not written, so the conclusion is not stamped. The work stays open.",
     },
     {
       id: "P3-TRIAD-B1",

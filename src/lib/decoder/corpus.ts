@@ -239,7 +239,9 @@ export const CONSTRAINED_CORPUS: readonly string[] = [
 ];
 
 export const CALLING_CARD = "MISS ELISABETH CAZENOVE PACKARD";
-export const ENGINE_VERSION = "16.17";
+export const ENGINE_VERSION = "16.30";
 export const SPEC_VERSION = "Build Readiness Package";
+/** 0-based index into the Latin-sorted corpus (stable). Not CONSTRAINED_CORPUS[49]. */
 export const PIVOT_INDEX = 49;
+/** 14-track Latin (base-26 digit-sum) of BAPTIST. Not A=1 gematria 87. */
 export const PIVOT_LATIN_TARGET = 219;

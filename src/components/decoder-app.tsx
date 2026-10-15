@@ -8,11 +8,13 @@ import {
   FileSearch,
   FlaskConical,
   Hash,
+  Inbox,
   Library,
   MapPinned,
   ScanLine,
   ShieldCheck,
   Layers,
+  Sigma,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ENGINE_VERSION } from "@/lib/decoder";
@@ -27,9 +29,13 @@ import { EvidencePanel } from "@/components/evidence-panel";
 import { ArtifactsPanel } from "@/components/artifacts-panel";
 import { SurveyPanel } from "@/components/survey-panel";
 import { PlanesPanel } from "@/components/planes-panel";
+import { DumpPanel } from "@/components/dump-panel";
+import { IrePanel } from "@/components/ire-panel";
 
 const NAV: { id: VectorId; label: string; icon: typeof Hash }[] = [
   { id: "overview", label: "Overview", icon: ScanLine },
+  { id: "dump", label: "Dump", icon: Inbox },
+  { id: "rails", label: "Rails", icon: Sigma },
   { id: "artifacts", label: "Field", icon: MapPinned },
   { id: "survey", label: "Survey", icon: Compass },
   { id: "planes", label: "Planes", icon: Layers },
@@ -42,7 +48,7 @@ const NAV: { id: VectorId; label: string; icon: typeof Hash }[] = [
 ];
 
 export function DecoderApp() {
-  const [vector, setVector] = useState<VectorId>("survey");
+  const [vector, setVector] = useState<VectorId>("overview");
 
   return (
     <div className="min-h-dvh bg-bg text-fg">
@@ -90,6 +96,8 @@ export function DecoderApp() {
       <main id="main" className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
         <div key={vector} className="stagger-in">
           {vector === "overview" && <OverviewPanel onOpen={setVector} />}
+          {vector === "dump" && <DumpPanel />}
+          {vector === "rails" && <IrePanel />}
           {vector === "artifacts" && <ArtifactsPanel />}
           {vector === "survey" && <SurveyPanel />}
           {vector === "planes" && <PlanesPanel />}

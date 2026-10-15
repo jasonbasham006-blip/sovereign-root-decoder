@@ -9,6 +9,17 @@ export const TRUE_PULL = 766;
 export const TRUE_PULL_RESIDUE = 31;
 export const PB_THRESHOLD_BP = 100;
 
+/** Trial division through √n. Used to earn the RNS LOCKED label. */
+export function isOddPrime(n: number): boolean {
+  if (n < 3 || n % 2 === 0) return false;
+  for (let d = 3; d * d <= n; d += 2) {
+    if (n % d === 0) return false;
+  }
+  return true;
+}
+
+export const RNS_PRIMES_PRIME = RNS_PRIMES.every(isOddPrime);
+
 export const CRATE_XRF = { ag: 9300, cu: 650, au: 25, pb: 25 } as const;
 
 export type XrfZone = "BODY" | "JOIN" | "HANDLE";
@@ -98,6 +109,7 @@ export type CompilationReport = {
   truePull: { value: number; residue: number; expect: number; pass: boolean };
   rns: {
     primes: readonly number[];
+    primesPrime: boolean;
     M: number;
     c12: number;
     c13: number;
@@ -128,6 +140,7 @@ export function runCompilation(reading: XrfReading = { zone: "BODY", ...CRATE_XR
     },
     rns: {
       primes: RNS_PRIMES,
+      primesPrime: RNS_PRIMES_PRIME,
       M: RNS_M,
       c12: RNS_C12,
       c13: RNS_C13,
@@ -136,7 +149,7 @@ export function runCompilation(reading: XrfReading = { zone: "BODY", ...CRATE_XR
       product,
       reconstructed: reconstructed.toString(),
       expected: expected.toString(),
-      pass: reconstructed === expected,
+      pass: reconstructed === expected && RNS_PRIMES_PRIME,
     },
     xrf: { ...evaluateXrf(reading), reading },
   };
